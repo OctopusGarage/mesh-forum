@@ -243,6 +243,12 @@ enum Retention {
     Bookmarked(Bookmark),
 }
 
+impl Retention {
+    fn offers_content(self) -> bool {
+        matches!(self, Self::Owned | Self::Bookmarked(Bookmark::Shared))
+    }
+}
+
 #[derive(Clone, Copy, Serialize, Deserialize)]
 pub struct CacheLimits {
     pub posts: usize,
@@ -273,6 +279,7 @@ pub struct Forum {
     posts: BTreeMap<PostId, (Post, Retention, u64)>,
     withdrawals: BTreeMap<PostId, Withdrawal>,
     cache_limits: CacheLimits,
+    board_index: board_index::BoardIndex,
 }
 
 impl Forum {
@@ -322,10 +329,14 @@ impl Forum {
             posts,
             withdrawals,
             cache_limits: CacheLimits::default(),
+            board_index: board_index::BoardIndex::default(),
         };
         let withdrawn: Vec<_> = forum.withdrawals.keys().copied().collect();
         for id in withdrawn {
             forum.remove_thread(id)?;
+        }
+        for (post, retention, _) in forum.posts.values() {
+            forum.board_index.update(post, *retention);
         }
         Ok(forum)
     }
@@ -466,11 +477,7 @@ impl Forum {
     /// Return local candidates for serving. The caller checks board and peer authorization.
     pub fn offer(&self, id: PostId) -> Option<&Post> {
         let (post, retention, _) = self.posts.get(&id)?;
-        matches!(
-            retention,
-            Retention::Owned | Retention::Bookmarked(Bookmark::Shared)
-        )
-        .then_some(post)
+        retention.offers_content().then_some(post)
     }
 
     pub fn read(&mut self, id: PostId, now: u64) -> io::Result<Option<Post>> {
@@ -509,6 +516,7 @@ impl Forum {
             }
             fs::remove_file(self.directory.join(filename(id)))?;
             if let Some((post, _, _)) = self.posts.remove(&id) {
+                self.board_index.remove(&post);
                 let root = post.hint().thread_id();
                 if !self
                     .posts
@@ -550,6 +558,7 @@ impl Forum {
         };
         let bytes = codec().serialize(&record).map_err(io::Error::other)?;
         self.persist(&filename(post.id), &bytes)?;
+        self.board_index.update(&post, retention);
         self.posts.insert(post.id, (post, retention, accessed));
         Ok(())
     }
@@ -567,6 +576,8 @@ fn filename(id: PostId) -> String {
     let hex: String = id.iter().map(|byte| format!("{byte:02x}")).collect();
     format!("{hex}.post")
 }
+
+mod board_index;
 
 mod network;
 pub use network::{fetch_index, fetch_resumable, serve_request, sync_withdrawals};
@@ -592,3 +603,79 @@ mod lan;
 pub use lan::LAN_DISCOVERY_PORT;
 
 mod account;
+
+#[cfg(test)]
+mod offered_index_tests {
+    use super::*;
+
+    fn ids(forum: &Forum, board: [u8; 32], offset: usize) -> Vec<PostId> {
+        forum
+            .index_page(board, offset)
+            .into_iter()
+            .map(|event| *event.id.as_bytes())
+            .collect()
+    }
+
+    #[test]
+    fn offered_pages_track_retention_withdrawal_and_reopen() {
+        let root = tempfile::tempdir().unwrap();
+        let author = DeviceIdentity::generate();
+        let mut origin = Forum::open(&root.path().join("origin")).unwrap();
+        let post = origin.publish(&author, [1; 32], "post", "body", 1).unwrap();
+        let revised = origin.edit(&author, post.id, "revised", "body", 2).unwrap();
+        origin
+            .publish(&author, [2; 32], "other board", "body", 3)
+            .unwrap();
+        assert_eq!(ids(&origin, [1; 32], 0), [revised.id, post.id]);
+        let reader_path = root.path().join("reader");
+        let mut reader = Forum::open(&reader_path).unwrap();
+        reader.cache(post.clone(), 1).unwrap();
+        assert!(ids(&reader, [1; 32], 0).is_empty());
+        reader.bookmark(post.id, Bookmark::Shared).unwrap();
+        assert_eq!(ids(&reader, [1; 32], 0), [post.id]);
+        // A failed durable mutation must leave the advertised view untouched.
+        std::fs::rename(&reader_path, root.path().join("moved")).unwrap();
+        assert!(reader.bookmark(post.id, Bookmark::Local).is_err());
+        assert_eq!(ids(&reader, [1; 32], 0), [post.id]);
+        std::fs::rename(root.path().join("moved"), &reader_path).unwrap();
+        reader.bookmark(post.id, Bookmark::Local).unwrap();
+        assert!(ids(&reader, [1; 32], 0).is_empty());
+        reader.bookmark(post.id, Bookmark::Shared).unwrap();
+        drop(reader);
+        let mut reader = Forum::open(&reader_path).unwrap();
+        assert_eq!(ids(&reader, [1; 32], 0), [post.id]);
+        let withdrawal = origin.withdraw(&author, post.id, 4).unwrap();
+        reader.apply_withdrawal(withdrawal).unwrap();
+        assert!(ids(&origin, [1; 32], 0).is_empty());
+        assert!(ids(&reader, [1; 32], 0).is_empty());
+        assert!(ids(&Forum::open(&reader_path).unwrap(), [1; 32], 0).is_empty());
+    }
+
+    #[test]
+    fn offered_pages_keep_the_original_window_order_and_bounds() {
+        let root = tempfile::tempdir().unwrap();
+        let author = DeviceIdentity::generate();
+        let mut forum = Forum::open(root.path()).unwrap();
+        let mut expected = Vec::new();
+        for i in 0..215 {
+            let post = forum
+                .publish(&author, [1; 32], &format!("post {i}"), "body", i / 3)
+                .unwrap();
+            expected.push((std::cmp::Reverse(post.signed_event().lamport), post.id));
+        }
+        expected.sort_unstable();
+        let expected: Vec<_> = expected.into_iter().map(|(_, id)| id).take(200).collect();
+        for offset in [0, 30, 150, 180, 199, 200] {
+            assert_eq!(
+                ids(&forum, [1; 32], offset),
+                expected
+                    .iter()
+                    .skip(offset)
+                    .take(30)
+                    .copied()
+                    .collect::<Vec<_>>()
+            );
+        }
+        assert!(ids(&forum, [2; 32], 0).is_empty());
+    }
+}

@@ -1,5 +1,6 @@
 //! Desktop-independent runtime for a manually connected forum node.
 
+use super::board_index::{INDEX_LIMIT, PAGE_SIZE};
 use super::index_cache::{self, IndexCache};
 use super::network::{fetch_revision, fetch_withdrawals, probe, serve_with_policy};
 use super::{
@@ -691,7 +692,7 @@ impl Node {
 
     /// Discover a bounded page across configured peers. Unreachable peers are skipped.
     pub async fn discover(&self, offset: u16) -> io::Result<Vec<PostHint>> {
-        if offset >= 200 {
+        if usize::from(offset) >= INDEX_LIMIT {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "board index offset out of range",
@@ -716,10 +717,12 @@ impl Node {
             tasks.spawn(async move {
                 let entries = timeout(REQUEST_TIMEOUT, async {
                     let mut entries = Vec::new();
-                    for start in (0..=(offset + 29).min(199)).step_by(30) {
+                    for start in (0..=(usize::from(offset) + PAGE_SIZE - 1).min(INDEX_LIMIT - 1))
+                        .step_by(PAGE_SIZE)
+                    {
                         let mut session = dial(&state, peer).await?;
-                        let page = fetch_index(&mut session, state.board, start).await?;
-                        let last = page.len() < 30;
+                        let page = fetch_index(&mut session, state.board, start as u16).await?;
+                        let last = page.len() < PAGE_SIZE;
                         entries.extend(page);
                         if last {
                             break;
@@ -781,9 +784,9 @@ impl Node {
         }
         Ok(page
             .into_iter()
-            .take(200)
+            .take(INDEX_LIMIT)
             .skip(usize::from(offset))
-            .take(30)
+            .take(PAGE_SIZE)
             .collect())
     }
 

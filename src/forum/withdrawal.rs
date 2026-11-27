@@ -103,7 +103,9 @@ impl Forum {
             .filter_map(|(post, _, _)| (post.hint().thread_id() == id).then_some(post.id))
             .collect();
         for revision in &revisions {
-            self.posts.remove(revision);
+            if let Some((post, _, _)) = self.posts.remove(revision) {
+                self.board_index.remove(&post);
+            }
         }
         let mut result = self.remove_withdrawn_body(id);
         for revision in revisions.into_iter().filter(|revision| *revision != id) {

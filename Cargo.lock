@@ -4489,7 +4489,7 @@ dependencies = [
 [[package]]
 name = "mesh-foundation-blob"
 version = "0.1.0-alpha.2"
-source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=d59d9f055c6f6391e82c99d6c785d45c1bd6b22a#d59d9f055c6f6391e82c99d6c785d45c1bd6b22a"
+source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=433546b6b7e5c95df073b04adf69b8758b7a2f90#433546b6b7e5c95df073b04adf69b8758b7a2f90"
 dependencies = [
  "aes-gcm 0.11.1",
  "futures-util",
@@ -4504,7 +4504,7 @@ dependencies = [
 [[package]]
 name = "mesh-foundation-connect"
 version = "0.1.0-alpha.2"
-source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=d59d9f055c6f6391e82c99d6c785d45c1bd6b22a#d59d9f055c6f6391e82c99d6c785d45c1bd6b22a"
+source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=433546b6b7e5c95df073b04adf69b8758b7a2f90#433546b6b7e5c95df073b04adf69b8758b7a2f90"
 dependencies = [
  "bincode",
  "futures-util",
@@ -4521,7 +4521,7 @@ dependencies = [
 [[package]]
 name = "mesh-foundation-e2ee"
 version = "0.1.0-alpha.2"
-source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=d59d9f055c6f6391e82c99d6c785d45c1bd6b22a#d59d9f055c6f6391e82c99d6c785d45c1bd6b22a"
+source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=433546b6b7e5c95df073b04adf69b8758b7a2f90#433546b6b7e5c95df073b04adf69b8758b7a2f90"
 dependencies = [
  "aes-gcm 0.11.1",
  "bincode",
@@ -4536,7 +4536,7 @@ dependencies = [
 [[package]]
 name = "mesh-foundation-identity"
 version = "0.1.0-alpha.2"
-source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=d59d9f055c6f6391e82c99d6c785d45c1bd6b22a#d59d9f055c6f6391e82c99d6c785d45c1bd6b22a"
+source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=433546b6b7e5c95df073b04adf69b8758b7a2f90#433546b6b7e5c95df073b04adf69b8758b7a2f90"
 dependencies = [
  "bincode",
  "ed25519-dalek",
@@ -4551,7 +4551,7 @@ dependencies = [
 [[package]]
 name = "mesh-foundation-mailbox"
 version = "0.1.0-alpha.2"
-source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=d59d9f055c6f6391e82c99d6c785d45c1bd6b22a#d59d9f055c6f6391e82c99d6c785d45c1bd6b22a"
+source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=433546b6b7e5c95df073b04adf69b8758b7a2f90#433546b6b7e5c95df073b04adf69b8758b7a2f90"
 dependencies = [
  "bincode",
  "mesh-foundation-replication",
@@ -4564,7 +4564,7 @@ dependencies = [
 [[package]]
 name = "mesh-foundation-replication"
 version = "0.1.0-alpha.2"
-source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=d59d9f055c6f6391e82c99d6c785d45c1bd6b22a#d59d9f055c6f6391e82c99d6c785d45c1bd6b22a"
+source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=433546b6b7e5c95df073b04adf69b8758b7a2f90#433546b6b7e5c95df073b04adf69b8758b7a2f90"
 dependencies = [
  "mesh-foundation-connect",
  "sha2 0.10.9",
@@ -4574,7 +4574,7 @@ dependencies = [
 [[package]]
 name = "mesh-foundation-storage"
 version = "0.1.0-alpha.2"
-source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=d59d9f055c6f6391e82c99d6c785d45c1bd6b22a#d59d9f055c6f6391e82c99d6c785d45c1bd6b22a"
+source = "git+https://github.com/OctopusGarage/mesh-foundation.git?rev=433546b6b7e5c95df073b04adf69b8758b7a2f90#433546b6b7e5c95df073b04adf69b8758b7a2f90"
 dependencies = [
  "aes-gcm 0.11.1",
  "bincode",
@@ -7342,7 +7342,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.4.3",
+ "getrandom 0.3.4",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",
@@ -8468,7 +8468,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]

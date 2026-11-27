@@ -6,7 +6,7 @@ use bincode::Options;
 use std::{cmp::Reverse, collections::BTreeMap, fs, io, path::Path};
 
 pub(super) const NAME: &str = "board-index";
-const MAX_ENTRIES: usize = 200;
+use super::board_index::INDEX_LIMIT as MAX_ENTRIES;
 const MAX_BYTES: u64 = 2 * 1024 * 1024;
 
 #[derive(Clone, Default)]

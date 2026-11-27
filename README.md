@@ -48,7 +48,8 @@ keeping LAN discovery enabled.
 ## Development and validation
 
 The manifest and lockfile pin all seven Mesh Foundation packages to the same
-Git revision.
+Git revision. Replication, E2EE and mailbox composition tests use development
+dependencies; the production forum protocol remains application-owned.
 
 ```sh
 cargo test --locked --features desktop-visual
@@ -79,3 +80,21 @@ macOS Pinyin - Simplified input source.
 
 For optional visual inspection, set `MESH_FORUM_EVAL_CAPTURE_DIR` for the
 Python script or `MESH_FORUM_CAPTURE_DIR` for the Swift script.
+
+## Module ownership
+
+Mesh Foundation supplies authenticated sessions, signatures, encrypted storage and
+verified resumable blob transfers. Forum owns post/revision/withdrawal records,
+board discovery, author access, bookmarks and sharing policy. Its production
+protocol does not depend on chat membership or the generic replication driver.
+
+The serving index is an application-owned ordered projection, updated only after
+a durable post/retention write and removed with its retained post. Opening a
+profile rebuilds it from validated records. Each index page visits at most the
+200-entry board window and resolves at most 30 posts, without sorting all posts
+again. The extra index stores one ordering key per shareable retained post; cache
+cleanup and withdrawals remove the corresponding keys. Upload admission remains
+checked on each request. Offset pages are fresh observations, not a pinned remote
+snapshot, so clients do not reuse cached pages across discovery calls. Withdrawal
+scans deliberately restart after exhaustion to catch new records below an old
+hash cursor.

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::{io, num::NonZeroUsize, path::Path, time::Duration};
 use tokio::io::{AsyncRead, AsyncWrite};
 
-const PAGE_SIZE: usize = 30;
+use super::board_index::{INDEX_LIMIT, PAGE_SIZE};
 const PROTOCOL: [u8; 8] = *b"MFORUM07";
 
 #[derive(Serialize, Deserialize)]
@@ -63,8 +63,6 @@ fn invalid(message: &'static str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, message)
 }
 
-const INDEX_LIMIT: usize = 200;
-
 fn check_offset(offset: u16) -> io::Result<usize> {
     let offset = usize::from(offset);
     if offset >= INDEX_LIMIT {
@@ -104,22 +102,7 @@ where
             if !uploads {
                 return send(peer, &0_u8).await;
             }
-            let mut posts: Vec<_> = forum
-                .posts
-                .keys()
-                .filter_map(|id| forum.offer(*id))
-                .filter(|post| post.signed_event().conversation_id.as_bytes() == &board)
-                .collect();
-            posts.sort_unstable_by_key(|post| {
-                (std::cmp::Reverse(post.signed_event().lamport), post.id)
-            });
-            let page: Vec<_> = posts
-                .into_iter()
-                .take(INDEX_LIMIT)
-                .skip(offset)
-                .take(PAGE_SIZE)
-                .map(Post::signed_event)
-                .collect();
+            let page = forum.index_page(board, offset);
             send(peer, &(page.len() as u8)).await?;
             for event in page {
                 send(peer, event).await?;
