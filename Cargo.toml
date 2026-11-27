@@ -5,26 +5,26 @@ edition = "2024"
 publish = false
 
 [dependencies]
-mesh-blob = { package = "mesh-foundation-blob", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "433546b6b7e5c95df073b04adf69b8758b7a2f90", features = ["mesh-connect"] }
+mesh-blob = { package = "mesh-foundation-blob", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "c8996ac17a740b66f780d81856c758c15b574dd5", features = ["mesh-connect"] }
 
-mesh-identity = { package = "mesh-foundation-identity", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "433546b6b7e5c95df073b04adf69b8758b7a2f90" }
+mesh-identity = { package = "mesh-foundation-identity", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "c8996ac17a740b66f780d81856c758c15b574dd5" }
 bincode = "1.3"
 sha2 = "0.10"
 hex = "0.4"
 tempfile = "3"
 serde = { version = "1", features = ["derive"] }
 
-mesh-connect = { package = "mesh-foundation-connect", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "433546b6b7e5c95df073b04adf69b8758b7a2f90" }
+mesh-connect = { package = "mesh-foundation-connect", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "c8996ac17a740b66f780d81856c758c15b574dd5" }
 tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "sync", "time"] }
-mesh-storage = { package = "mesh-foundation-storage", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "433546b6b7e5c95df073b04adf69b8758b7a2f90" }
+mesh-storage = { package = "mesh-foundation-storage", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "c8996ac17a740b66f780d81856c758c15b574dd5" }
 zeroize = "1"
 
 [dev-dependencies]
-mesh-replication = { package = "mesh-foundation-replication", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "433546b6b7e5c95df073b04adf69b8758b7a2f90", features = ["mesh-connect"] }
+mesh-replication = { package = "mesh-foundation-replication", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "c8996ac17a740b66f780d81856c758c15b574dd5", features = ["mesh-connect"] }
 x25519-dalek = { version = "2", features = ["static_secrets"] }
 
-mesh-e2ee = { package = "mesh-foundation-e2ee", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "433546b6b7e5c95df073b04adf69b8758b7a2f90" }
-mesh-mailbox = { package = "mesh-foundation-mailbox", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "433546b6b7e5c95df073b04adf69b8758b7a2f90" }
+mesh-e2ee = { package = "mesh-foundation-e2ee", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "c8996ac17a740b66f780d81856c758c15b574dd5" }
+mesh-mailbox = { package = "mesh-foundation-mailbox", git = "https://github.com/OctopusGarage/mesh-foundation.git", rev = "c8996ac17a740b66f780d81856c758c15b574dd5" }
 
 [workspace]
 
