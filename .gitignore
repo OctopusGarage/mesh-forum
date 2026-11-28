@@ -1,0 +1,4 @@
+/target/
+
+# Stable OS lease inode used by the managed SDK snapshot updater.
+.mesh-*.snapshot-lock
